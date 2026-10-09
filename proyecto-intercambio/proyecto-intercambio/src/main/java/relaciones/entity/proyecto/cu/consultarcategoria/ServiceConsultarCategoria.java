@@ -1,12 +1,13 @@
 package relaciones.entity.proyecto.cu.consultarcategoria;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import relaciones.entity.proyecto.cu.consultarcategoria.response.ResponseCategoria;
 import relaciones.entity.proyecto.dominio.entity.Categoria;
 import relaciones.entity.proyecto.dominio.repository.RepoCategoria;
+import relaciones.entity.proyecto.excepcion.RecursoNoEncontradoException;
+
+import java.util.List;
 
 @Service
 public class ServiceConsultarCategoria {
@@ -20,9 +21,18 @@ public class ServiceConsultarCategoria {
     @Transactional(readOnly = true)
     public ResponseCategoria consultarCategoria(int id) {
         Categoria categoria = repoCategoria.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Categoria con id " + id + " no existe"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Categoria con id " + id + " no existe"));
+        return toResponse(categoria);
+    }
 
+    @Transactional(readOnly = true)
+    public List<ResponseCategoria> listarTodos() {
+        return repoCategoria.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ResponseCategoria toResponse(Categoria categoria) {
         return new ResponseCategoria(
                 categoria.getId(),
                 categoria.getNombre(),

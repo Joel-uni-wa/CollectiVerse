@@ -1,12 +1,13 @@
 package relaciones.entity.proyecto.cu.consultarproducto;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import relaciones.entity.proyecto.cu.consultarproducto.response.ResponseProducto;
 import relaciones.entity.proyecto.dominio.entity.Producto;
 import relaciones.entity.proyecto.dominio.repository.RepoProducto;
+import relaciones.entity.proyecto.excepcion.RecursoNoEncontradoException;
+
+import java.util.List;
 
 @Service
 public class ServiceConsultarProducto {
@@ -20,9 +21,18 @@ public class ServiceConsultarProducto {
     @Transactional(readOnly = true)
     public ResponseProducto consultarProducto(int id) {
         Producto producto = repoProducto.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Producto con id " + id + " no existe"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto con id " + id + " no existe"));
+        return toResponse(producto);
+    }
 
+    @Transactional(readOnly = true)
+    public List<ResponseProducto> listarTodos() {
+        return repoProducto.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ResponseProducto toResponse(Producto producto) {
         return new ResponseProducto(
                 producto.getId(),
                 producto.getNombre(),

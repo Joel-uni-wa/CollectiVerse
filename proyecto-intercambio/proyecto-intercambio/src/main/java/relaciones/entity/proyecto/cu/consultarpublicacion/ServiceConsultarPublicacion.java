@@ -1,12 +1,13 @@
 package relaciones.entity.proyecto.cu.consultarpublicacion;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import relaciones.entity.proyecto.cu.consultarpublicacion.response.ResponsePublicacion;
 import relaciones.entity.proyecto.dominio.entity.Publicacion;
 import relaciones.entity.proyecto.dominio.repository.RepoPublicacion;
+import relaciones.entity.proyecto.excepcion.RecursoNoEncontradoException;
+
+import java.util.List;
 
 @Service
 public class ServiceConsultarPublicacion {
@@ -20,9 +21,18 @@ public class ServiceConsultarPublicacion {
     @Transactional(readOnly = true)
     public ResponsePublicacion consultarPublicacion(int id) {
         Publicacion publicacion = repoPublicacion.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Publicacion con id " + id + " no existe"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Publicacion con id " + id + " no existe"));
+        return toResponse(publicacion);
+    }
 
+    @Transactional(readOnly = true)
+    public List<ResponsePublicacion> listarTodos() {
+        return repoPublicacion.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ResponsePublicacion toResponse(Publicacion publicacion) {
         return new ResponsePublicacion(
                 publicacion.getId(),
                 publicacion.getTitulo(),

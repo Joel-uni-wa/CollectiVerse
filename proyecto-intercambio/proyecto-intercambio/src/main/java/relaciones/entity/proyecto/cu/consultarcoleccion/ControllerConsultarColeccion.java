@@ -3,6 +3,8 @@ package relaciones.entity.proyecto.cu.consultarcoleccion;
 import org.springframework.web.bind.annotation.*;
 import relaciones.entity.proyecto.cu.consultarcoleccion.response.ResponseColeccion;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/coleccion")
 public class ControllerConsultarColeccion {
@@ -11,6 +13,11 @@ public class ControllerConsultarColeccion {
 
     public ControllerConsultarColeccion(ServiceConsultarColeccion serviceConsultarColeccion) {
         this.serviceConsultarColeccion = serviceConsultarColeccion;
+    }
+
+    @GetMapping("/todos")
+    public List<ResponseColeccion> listarTodos() {
+        return serviceConsultarColeccion.listarTodos();
     }
 
     @GetMapping("/{id}")

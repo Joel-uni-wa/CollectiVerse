@@ -44,7 +44,7 @@ public class Publicacion {
     @Column(name = "fecha", nullable = false)
     private LocalDateTime fecha;
 
-    @OneToMany(mappedBy = "publicacion")
+    @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PublicacionIntercambio> intercambios = new ArrayList<>();
 
     @PrePersist
@@ -52,6 +52,15 @@ public class Publicacion {
         if (fecha == null) {
             fecha = LocalDateTime.now();
         }
+    }
+
+    public void agregarIntercambio(String nombreSolicitado, String descripcion, Integer cantidad) {
+        PublicacionIntercambio item = new PublicacionIntercambio();
+        item.setPublicacion(this);
+        item.setNombreSolicitado(nombreSolicitado);
+        item.setDescripcion(descripcion);
+        item.setCantidad(cantidad);
+        intercambios.add(item);
     }
 
     public Integer getId() {

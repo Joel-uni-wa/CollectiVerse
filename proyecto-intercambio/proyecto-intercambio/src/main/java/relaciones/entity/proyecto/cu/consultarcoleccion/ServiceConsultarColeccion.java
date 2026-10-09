@@ -1,12 +1,13 @@
 package relaciones.entity.proyecto.cu.consultarcoleccion;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import relaciones.entity.proyecto.cu.consultarcoleccion.response.ResponseColeccion;
 import relaciones.entity.proyecto.dominio.entity.Coleccion;
 import relaciones.entity.proyecto.dominio.repository.RepoColeccion;
+import relaciones.entity.proyecto.excepcion.RecursoNoEncontradoException;
+
+import java.util.List;
 
 @Service
 public class ServiceConsultarColeccion {
@@ -20,9 +21,18 @@ public class ServiceConsultarColeccion {
     @Transactional(readOnly = true)
     public ResponseColeccion consultarColeccion(int id) {
         Coleccion coleccion = repoColeccion.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Coleccion con id " + id + " no existe"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Coleccion con id " + id + " no existe"));
+        return toResponse(coleccion);
+    }
 
+    @Transactional(readOnly = true)
+    public List<ResponseColeccion> listarTodos() {
+        return repoColeccion.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ResponseColeccion toResponse(Coleccion coleccion) {
         return new ResponseColeccion(
                 coleccion.getId(),
                 coleccion.getCategoria().getId(),

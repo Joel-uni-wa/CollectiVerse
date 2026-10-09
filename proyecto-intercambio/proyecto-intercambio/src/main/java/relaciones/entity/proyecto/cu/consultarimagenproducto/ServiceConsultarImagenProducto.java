@@ -1,12 +1,13 @@
 package relaciones.entity.proyecto.cu.consultarimagenproducto;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import relaciones.entity.proyecto.cu.consultarimagenproducto.response.ResponseImagenProducto;
 import relaciones.entity.proyecto.dominio.entity.ImagenProducto;
 import relaciones.entity.proyecto.dominio.repository.RepoImagenProducto;
+import relaciones.entity.proyecto.excepcion.RecursoNoEncontradoException;
+
+import java.util.List;
 
 @Service
 public class ServiceConsultarImagenProducto {
@@ -20,9 +21,18 @@ public class ServiceConsultarImagenProducto {
     @Transactional(readOnly = true)
     public ResponseImagenProducto consultarImagenProducto(int id) {
         ImagenProducto imagenProducto = repoImagenProducto.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Imagen de producto con id " + id + " no existe"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Imagen de producto con id " + id + " no existe"));
+        return toResponse(imagenProducto);
+    }
 
+    @Transactional(readOnly = true)
+    public List<ResponseImagenProducto> listarTodos() {
+        return repoImagenProducto.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ResponseImagenProducto toResponse(ImagenProducto imagenProducto) {
         return new ResponseImagenProducto(
                 imagenProducto.getId(),
                 imagenProducto.getProducto().getId(),
